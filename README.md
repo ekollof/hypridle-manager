@@ -4,14 +4,16 @@ A Python script to dynamically manage Hyprland's hypridle daemon configuration b
 
 ## Features
 
--   Different timeouts and actions for AC, battery, and low battery states.
--   Configurable timeouts and commands for dimming, locking, screen off (DPMS), and suspending.
--   Automatically updates `hypridle.conf` and restarts `hypridle` when power status changes.
--   Can manage `hypridle` as a systemd service.
+-   **Real-time power monitoring**: Instantly detects power state changes using Linux udev events
+-   Different timeouts and actions for AC, battery, and low battery states
+-   Configurable timeouts and commands for dimming, locking, screen off (DPMS), and suspending
+-   Automatically updates `hypridle.conf` and restarts `hypridle` when power status changes
+-   Can manage `hypridle` as a systemd service
+-   Low resource usage with event-driven architecture
 
 ## How it works
 
-This script runs as a background daemon. It periodically checks the system's power status (connected to AC, on battery, or low battery). When the power status changes, it generates a new `~/.config/hypr/hypridle.conf` file with the timeouts and commands you've configured for that state. It then restarts the `hypridle` daemon to apply the new settings.
+This script runs as a background daemon that monitors your system's power status in real-time. Using Linux's udev system, it instantly detects when you plug or unplug your charger and immediately updates power profiles. When the power status changes, it generates a new `~/.config/hypr/hypridle.conf` file with the timeouts and commands you've configured for that state and restarts the `hypridle` daemon to apply the new settings.
 
 The generated `hypridle.conf` will use the `lock_command` you specify to lock the screen. It will also ensure that only one instance of the lock command is running at a time.
 
@@ -48,7 +50,10 @@ If you prefer to install the script manually, follow these steps:
     pip install -r requirements.txt
     ```
 
-    *Note: If `pip` is not available or you prefer to use your distribution's package manager, you may need to install `psutil` manually (e.g., `sudo apt install python3-psutil` on Debian/Ubuntu).*
+    *Note: If `pip` is not available or you prefer to use your distribution's package manager, you may need to install the dependencies manually:*
+    - *`sudo apt install python3-psutil python3-pyudev` on Debian/Ubuntu*
+    - *`sudo pacman -S python-psutil python-pyudev` on Arch Linux*
+    - *`sudo dnf install python3-psutil python3-pyudev` on Fedora*
 
 ## Configuration
 

@@ -6,6 +6,9 @@ from pathlib import Path
 import configparser
 import psutil
 import subprocess
+import pyudev
+import select
+import threading
 
 CONFIG_PATH = Path.home() / ".config/hypridle-handler/config.ini"
 
@@ -116,6 +119,36 @@ def check_and_enable_hypridle_service():
     except subprocess.CalledProcessError as e:
         print(f"Error managing hypridle service: {e}", file=sys.stderr)
 
+def handle_power_change(config, systemd_mode, hypridle_config_path, current_power_state):
+    """Handle power state change and update configuration."""
+    new_power_state = get_power_status(config)
+    
+    if new_power_state != current_power_state[0]:
+        print(f"Power state changed to: {new_power_state}")
+        current_power_state[0] = new_power_state
+        
+        hypridle_config_content = generate_hypridle_config(current_power_state[0], config)
+        
+        with open(hypridle_config_path, "w") as f:
+            f.write(hypridle_config_content)
+        
+        print("hypridle.conf updated. Restarting hypridle...")
+        restart_hypridle(systemd_mode)
+
+def monitor_power_events(config, systemd_mode, hypridle_config_path, current_power_state):
+    """Monitor power supply events using udev."""
+    context = pyudev.Context()
+    monitor = pyudev.Monitor.from_netlink(context)
+    monitor.filter_by('power_supply')
+    
+    print("Starting real-time power monitoring...")
+    
+    for device in iter(monitor.poll, None):
+        if device.action in ['change', 'add', 'remove']:
+            # Small delay to let the system settle after the event
+            time.sleep(0.5)
+            handle_power_change(config, systemd_mode, hypridle_config_path, current_power_state)
+
 def main():
     """Main function."""
     if not CONFIG_PATH.is_file():
@@ -136,24 +169,27 @@ def main():
         
     hypridle_config_path = Path(config.get('general', 'hypridle_config_path', fallback='/tmp/hypridle.conf')).expanduser()
 
-    current_power_state = None
-
-    while True:
-        new_power_state = get_power_status(config)
-
-        if new_power_state != current_power_state:
-            print(f"Power state changed to: {new_power_state}")
-            current_power_state = new_power_state
-            
-            hypridle_config_content = generate_hypridle_config(current_power_state, config)
-            
-            with open(hypridle_config_path, "w") as f:
-                f.write(hypridle_config_content)
-            
-            print("hypridle.conf updated. Restarting hypridle...")
-            restart_hypridle(systemd_mode)
-
-        time.sleep(30)  # Check every 30 seconds
+    # Use a list to make it mutable for the callback
+    current_power_state = [None]
+    
+    # Set initial state
+    handle_power_change(config, systemd_mode, hypridle_config_path, current_power_state)
+    
+    # Start monitoring in a separate thread so we can handle interrupts
+    monitor_thread = threading.Thread(
+        target=monitor_power_events, 
+        args=(config, systemd_mode, hypridle_config_path, current_power_state),
+        daemon=True
+    )
+    monitor_thread.start()
+    
+    try:
+        # Keep the main thread alive
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\nShutting down power manager...")
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()

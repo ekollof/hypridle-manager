@@ -116,8 +116,49 @@ if [ "$SKIP_DEPS" = false ]; then
                     # Check if virtual environment installation succeeded
                     if [ "$VENV_INSTALL" != "true" ]; then
                         echo ""
-                        echo "All pip-based installation methods failed due to PEP 668."
-                        echo "Please install dependencies using your system package manager:"
+                        echo "Virtual environment approach failed. Checking if dependencies are available via system packages..."
+                        
+                        # Final check: see if dependencies are now available via system packages
+                        python3 -c "import psutil, pyudev" &>/dev/null
+                        SYSTEM_DEPS_AVAILABLE=$?
+                        
+                        if [ $SYSTEM_DEPS_AVAILABLE -eq 0 ]; then
+                            echo "Great! Dependencies are already available via system packages."
+                            echo "Proceeding with installation..."
+                        else
+                            echo ""
+                            echo "Dependencies are not available via system packages either."
+                            echo "Please install dependencies using your system package manager:"
+                            echo ""
+                            echo "For Debian/Ubuntu:"
+                            echo "  sudo apt install python3-psutil python3-pyudev"
+                            echo ""
+                            echo "For Arch Linux:"
+                            echo "  sudo pacman -S python-psutil python-pyudev"
+                            echo ""
+                            echo "For Fedora:"
+                            echo "  sudo dnf install python3-psutil python3-pyudev"
+                            echo ""
+                            echo "For openSUSE:"
+                            echo "  sudo zypper install python3-psutil python3-pyudev"
+                            echo ""
+                            echo "After installing system packages, re-run this script with --skip-deps"
+                            exit 1
+                        fi
+                    fi
+                else
+                    echo "pip3 installation failed for other reasons."
+                    echo "Checking if dependencies might already be available via system packages..."
+                    
+                    # Check if dependencies are available via system packages
+                    python3 -c "import psutil, pyudev" &>/dev/null
+                    SYSTEM_DEPS_AVAILABLE=$?
+                    
+                    if [ $SYSTEM_DEPS_AVAILABLE -eq 0 ]; then
+                        echo "Great! Dependencies are already available via system packages."
+                        echo "Proceeding with installation..."
+                    else
+                        echo "Dependencies are not available. Please check the pip error above or install via system packages:"
                         echo ""
                         echo "For Debian/Ubuntu:"
                         echo "  sudo apt install python3-psutil python3-pyudev"
@@ -128,15 +169,9 @@ if [ "$SKIP_DEPS" = false ]; then
                         echo "For Fedora:"
                         echo "  sudo dnf install python3-psutil python3-pyudev"
                         echo ""
-                        echo "For openSUSE:"
-                        echo "  sudo zypper install python3-psutil python3-pyudev"
-                        echo ""
                         echo "After installing system packages, re-run this script with --skip-deps"
                         exit 1
                     fi
-                else
-                    echo "pip3 installation failed for other reasons. Please check the error above."
-                    exit 1
                 fi
             fi
             
@@ -146,12 +181,30 @@ if [ "$SKIP_DEPS" = false ]; then
             echo "pip3 not found. Attempting to install using ensurepip..."
             python3 -m ensurepip --default-pip || {
                 echo "Failed to ensure pip3 is installed."
-                echo "Please install dependencies using your system package manager:"
-                echo "  sudo apt install python3-psutil python3-pyudev  # Debian/Ubuntu"
-                echo "  sudo pacman -S python-psutil python-pyudev     # Arch Linux" 
-                echo "  sudo dnf install python3-psutil python3-pyudev  # Fedora"
-                echo "Then re-run this script with --skip-deps"
-                exit 1
+                echo "Checking if dependencies are already available via system packages..."
+                
+                # Check if dependencies are available via system packages
+                python3 -c "import psutil, pyudev" &>/dev/null
+                SYSTEM_DEPS_AVAILABLE=$?
+                
+                if [ $SYSTEM_DEPS_AVAILABLE -eq 0 ]; then
+                    echo "Great! Dependencies are already available via system packages."
+                    echo "Proceeding with installation..."
+                else
+                    echo "Dependencies are not available. Please install them using your system package manager:"
+                    echo ""
+                    echo "For Debian/Ubuntu:"
+                    echo "  sudo apt install python3-psutil python3-pyudev"
+                    echo ""
+                    echo "For Arch Linux:"
+                    echo "  sudo pacman -S python-psutil python-pyudev"
+                    echo ""
+                    echo "For Fedora:"
+                    echo "  sudo dnf install python3-psutil python3-pyudev"
+                    echo ""
+                    echo "Then re-run this script with --skip-deps"
+                    exit 1
+                fi
             }
         fi
     fi

@@ -1,0 +1,55 @@
+# Configuration for hypridle-manager.py
+
+[general]
+# Enable systemd mode.
+systemd_mode = false
+
+# The battery level to be considered "low".
+low_battery_percentage = 20
+
+# Path to the hypridle configuration file to be generated.
+hypridle_config_path = ~/.config/hypr/hypridle.conf
+
+# The command to lock the screen.
+lock_command = hyprlock
+
+[on_ac]
+# Timeouts in seconds. Set to 0 to disable.
+dim_timeout = 0
+lock_timeout = 0
+dpms_off_timeout = 0
+suspend_timeout = 0
+
+# Commands to run.
+dim_command = brightnessctl set 10%-
+dpms_off_command = hyprctl dispatch dpms off
+suspend_command = systemctl suspend
+dpms_on_command = hyprctl dispatch dpms on
+
+
+[on_battery]
+# Timeouts in seconds.
+dim_timeout = 180
+lock_timeout = 300
+dpms_off_timeout = 600
+suspend_timeout = 1200
+
+# Commands to run.
+dim_command = brightnessctl set 25%-
+dpms_off_command = hyprctl dispatch dpms off
+suspend_command = systemctl suspend
+dpms_on_command = hyprctl dispatch dpms on
+
+
+[low_battery]
+# Timeouts in seconds.
+dim_timeout = 60
+lock_timeout = 120
+dpms_off_timeout = 180
+suspend_timeout = 300
+
+# Commands to run.
+dim_command = brightnessctl set 5
+dpms_off_command = hyprctl dispatch dpms off
+suspend_command = systemctl hibernate
+dpms_on_command = hyprctl dispatch dpms on

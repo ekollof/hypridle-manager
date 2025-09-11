@@ -155,7 +155,7 @@ def main():
         print(f"Error: Configuration file not found at {CONFIG_PATH}", file=sys.stderr)
         sys.exit(1)
 
-    config = configparser.ConfigParser()
+    config = configparser.ConfigParser(interpolation=None)
     try:
         config.read(CONFIG_PATH)
     except configparser.Error as e:

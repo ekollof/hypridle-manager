@@ -13,6 +13,13 @@ hypridle_config_path = ~/.config/hypr/hypridle.conf
 # The command to lock the screen.
 lock_command = hyprlock
 
+[lid_switch]
+# Commands to run when the lid is closed, based on power state.
+# Set to an empty string to do nothing.
+on_ac_command = loginctl lock-session
+on_battery_command = systemctl hibernate
+low_battery_command = systemctl hibernate
+
 [on_ac]
 # Timeouts in seconds. Set to 0 to disable.
 dim_timeout = 0

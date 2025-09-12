@@ -1,0 +1,30 @@
+{
+  "pythonVersion": "3.10",
+  "pythonPlatform": "All",
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "pythonVersion": "3.10"
+    }
+  ],
+  "exclude": ["**/__pycache__", "**/node_modules", "**/.venv", "docs", ".git"],
+  "typeCheckingMode": "strict",
+  "reportUnusedFunction": "none",
+  "reportMissingSuperCall": "none",
+  "reportUnknownArgumentType": "none",
+  "reportUnknownParameterType": "none",
+  "reportPartiallyUnknownParameterType": "none",
+  "reportPartiallyUnknownReturnType": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownVariableType": "none",
+  "reportPartiallyUnknownSetType": "none",
+  "reportDeprecated": "error",
+  "reportUnnecessaryComparison": "warning",
+  "reportUnnecessaryContains": "warning",
+  "reportUnnecessaryIsInstance": "warning",
+  "reportRedundantExpressionInAssert": "warning",
+  "reportUnnecessaryTypeIgnoreComment": "warning",
+  "strictListInference": true,
+  "strictDictionaryInference": true,
+  "strictSetInference": true
+}

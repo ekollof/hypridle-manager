@@ -9,6 +9,7 @@ A Python script to dynamically manage Hyprland's hypridle daemon configuration b
 -   Configurable timeouts and commands for dimming, locking, screen off (DPMS), and suspending
 -   Automatically updates `hypridle.conf` and restarts `hypridle` when power status changes
 -   Can manage `hypridle` as a systemd service
+-   **Lid switch handling**: Runs custom commands when the laptop lid is closed, based on power state
 -   Low resource usage with event-driven architecture
 
 ## How it works
@@ -24,20 +25,29 @@ The generated `hypridle.conf` will use the `lock_command` you specify to lock th
 For a quick and easy setup, you can use the provided install script. This will handle all the necessary steps for you.
 
 ```bash
-chmod +x install.sh
-./install.sh
+chmod +x install.py
+./install.py
 ```
 
 To install and configure the manager to run as a systemd service, use the `--systemd` flag:
 
 ```bash
-./install.sh --systemd
+./install.py --systemd
 ```
 
 If you prefer to install Python dependencies manually (e.g., via your distribution's package manager), you can skip the `pip install` step by using the `--skip-deps` flag:
 
 ```bash
-./install.sh --skip-deps
+./install.py --skip-deps
+```
+
+### Legacy Bash Installer
+
+A legacy bash installer (`install.sh`) is also available for compatibility:
+
+```bash
+chmod +x install.sh
+./install.sh
 ```
 
 ### Manual Installation
@@ -80,6 +90,18 @@ If you prefer to install the script manually, follow these steps:
         -   `[on_ac]`, `[on_battery]`, `[low_battery]`: Sections for each power state.
         -   `*_timeout`: Timeouts in seconds for each action.
         -   `*_command`: Commands to be executed for each action.
+    
+    ## Lid Switch Handling
+    
+    The `hyprland-lid-manager.py` script handles laptop lid switch events. When the lid is closed, it checks the current power state and runs the appropriate command from the `[lid_switch]` section.
+    
+    To enable lid switch handling in Hyprland, add the following to your `~/.config/hypr/hyprland.conf`:
+    
+    ```ini
+    bindl=,switch:Lid Switch,exec,hyprland-lid-manager.py
+    ```
+    
+    This will run the lid manager script whenever the lid is closed. The script will determine the power state and execute the configured command (e.g., lock session, hibernate, etc.).
     
     ## Hyprland Setup
     

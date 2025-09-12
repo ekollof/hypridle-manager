@@ -1,0 +1,55 @@
+# Ruff configuration for Python 3.10+ compliance and modern syntax
+# This configuration enforces modern Python patterns while being practical for qtile
+
+target-version = "py310"
+line-length = 88
+indent-width = 4
+
+[lint]
+# Enable rule categories for Python 3.10+ compliance
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "UP",  # pyupgrade (modernization) - KEY for 3.10+ compliance
+    "I",   # isort (import sorting)
+    "N",   # pep8-naming
+    "B",   # flake8-bugbear
+    "A",   # flake8-builtins
+    "C4",  # flake8-comprehensions
+    "PIE", # flake8-pie (unnecessary code)
+    "SIM", # flake8-simplify
+    "RUF", # Ruff-specific rules
+    "FA",  # flake8-future-annotations
+]
+
+# Ignore specific rules that conflict with qtile's patterns
+ignore = [
+    "E501",   # Line too long (we set line-length above)
+    "F403",   # Star imports (qtile configs often use these)
+    "F405",   # Names from star imports may be undefined
+    "A003",   # Builtin shadowing (qtile uses 'qtile' variable name)
+    "N806",   # Variable in function should be lowercase (qtile has CamelCase APIs)
+    "SIM108", # Use ternary operator (sometimes if/else is clearer)
+    "B008",   # Do not perform function calls in argument defaults (qtile lazy calls)
+    "RUF012", # Mutable class attributes should be annotated
+]
+
+[lint.pyupgrade]
+# Keep legacy typing imports as errors to enforce modern syntax
+keep-runtime-typing = false
+
+[lint.isort]
+# Configure import sorting
+force-single-line = false
+split-on-trailing-comma = true
+combine-as-imports = true
+
+[lint.flake8-bugbear]
+extend-immutable-calls = ["lazy"]
+
+[format]
+# Use modern formatting
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"

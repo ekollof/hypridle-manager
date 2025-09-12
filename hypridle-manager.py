@@ -60,13 +60,17 @@ general {{
     dim_timeout = config.getint(power_state, 'dim_timeout', fallback=0)
     if dim_timeout > 0:
         dim_command = config.get(power_state, 'dim_command')
+        dim_resume_command = config.get(power_state, 'dim_resume_command', fallback='')
         config_content += f"""
 
 listener {{
     timeout = {dim_timeout}
-    on-timeout = {dim_command}
-}}
-"""
+    on-timeout = {dim_command}"""
+        if dim_resume_command:
+            config_content += f"""
+    on-resume = {dim_resume_command}"""
+        config_content += f"""
+}}"""
 
     lock_timeout = config.getint(power_state, 'lock_timeout', fallback=0)
     if lock_timeout > 0:

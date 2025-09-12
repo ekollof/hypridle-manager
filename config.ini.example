@@ -29,6 +29,7 @@ suspend_timeout = 0
 
 # Commands to run.
 dim_command = brightnessctl set 10%-
+dim_resume_command = brightnessctl set +10%
 dpms_off_command = hyprctl dispatch dpms off
 suspend_command = systemctl suspend
 dpms_on_command = hyprctl dispatch dpms on
@@ -43,6 +44,7 @@ suspend_timeout = 1200
 
 # Commands to run.
 dim_command = brightnessctl set 25%-
+dim_resume_command = brightnessctl set +25%
 dpms_off_command = hyprctl dispatch dpms off
 suspend_command = systemctl suspend
 dpms_on_command = hyprctl dispatch dpms on
@@ -57,6 +59,7 @@ suspend_timeout = 300
 
 # Commands to run.
 dim_command = brightnessctl set 5
+dim_resume_command = brightnessctl set 80%
 dpms_off_command = hyprctl dispatch dpms off
 suspend_command = systemctl hibernate
 dpms_on_command = hyprctl dispatch dpms on

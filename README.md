@@ -88,6 +88,7 @@ If you prefer to install manually, follow these steps:
    - `[on_ac]`, `[on_battery]`, `[low_battery]`: Sections for each power state.
    - `*_timeout`: Timeouts in seconds for each action.
    - `*_command`: Commands to be executed for each action.
+   - `dim_resume_command`: Command to restore brightness when resuming from dim (should reverse the dim_command).
 
 ## Lid Switch Handling
 

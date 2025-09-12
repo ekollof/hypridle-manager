@@ -168,8 +168,8 @@ def monitor_power_events(config: configparser.ConfigParser, systemd_mode: bool, 
     @param hypridle_config_path The path to the hypridle config file.
     @param current_power_state The mutable list holding the current power state.
     """
-    context = pyudev.Context()
-    monitor = pyudev.Monitor.from_netlink(context)
+    context = pyudev.Context() # type: ignore
+    monitor = pyudev.Monitor.from_netlink(context) # type: ignore
     monitor.filter_by('power_supply')
 
     print("Starting real-time power monitoring...")

@@ -4,13 +4,13 @@ A Python script to dynamically manage Hyprland's hypridle daemon configuration b
 
 ## Features
 
--   **Real-time power monitoring**: Instantly detects power state changes using Linux udev events
--   Different timeouts and actions for AC, battery, and low battery states
--   Configurable timeouts and commands for dimming, locking, screen off (DPMS), and suspending
--   Automatically updates `hypridle.conf` and restarts `hypridle` when power status changes
--   Can manage `hypridle` as a systemd service
--   **Lid switch handling**: Runs custom commands when the laptop lid is closed, based on power state
--   Low resource usage with event-driven architecture
+- **Real-time power monitoring**: Instantly detects power state changes using Linux udev events
+- Different timeouts and actions for AC, battery, and low battery states
+- Configurable timeouts and commands for dimming, locking, screen off (DPMS), and suspending
+- Automatically updates `hypridle.conf` and restarts `hypridle` when power status changes
+- Can manage `hypridle` as a systemd service
+- **Lid switch handling**: Runs custom commands when the laptop lid is closed, based on power state
+- Low resource usage with event-driven architecture
 
 ## How it works
 
@@ -41,6 +41,7 @@ python3 install.py --skip-deps
 ```
 
 The installer will:
+
 - Install Python dependencies (unless `--skip-deps` is used)
 - Install the scripts to `/usr/local/bin`
 - Create the configuration directory and copy the example config
@@ -87,7 +88,7 @@ If you prefer to install manually, follow these steps:
    - `[on_ac]`, `[on_battery]`, `[low_battery]`: Sections for each power state.
    - `*_timeout`: Timeouts in seconds for each action.
    - `*_command`: Commands to be executed for each action.
-    
+
 ## Lid Switch Handling
 
 The `hyprland-lid-manager.py` script handles laptop lid switch events. When the lid is closed, it checks the current power state and runs the appropriate command from the `[lid_switch]` section.
@@ -121,6 +122,7 @@ python3 install.py --systemd
 ```
 
 This will:
+
 1. Set `systemd_mode = true` in `~/.config/hypridle-handler/config.ini`.
 2. Create the necessary systemd service files (`hypridle.service` and `hypridle-manager.service`) in `~/.config/systemd/user/`.
 3. Enable and start the `hypridle-manager.service`.

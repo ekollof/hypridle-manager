@@ -111,7 +111,7 @@ def install_scripts(venv_path: Path, venv_used: bool) -> None:
 
 def ensure_lid_config(config_file: Path) -> None:
     """Ensure the config file has the lid_switch section with default values."""
-    config = configparser.ConfigParser()
+    config = configparser.ConfigParser(interpolation=None)  # Disable interpolation
     config.read(config_file)
 
     if not config.has_section('lid_switch'):
@@ -123,6 +123,40 @@ def ensure_lid_config(config_file: Path) -> None:
         with open(config_file, 'w') as f:
             config.write(f)
         print("Added lid_switch configuration section to existing config file.")
+
+def ensure_dim_resume_config(config_file: Path) -> None:
+    """Ensure the config file has dim_resume_command in all power state sections."""
+    config = configparser.ConfigParser(interpolation=None)  # Disable interpolation to handle % characters
+    config.read(config_file)
+
+    updated = False
+    power_states = ['on_ac', 'on_battery', 'low_battery']
+
+    for state in power_states:
+        if config.has_section(state):
+            # Check if dim_resume_command is missing
+            if not config.has_option(state, 'dim_resume_command'):
+                # Add appropriate dim_resume_command based on the dim_command
+                try:
+                    dim_command = config.get(state, 'dim_command')
+                except (configparser.NoOptionError, configparser.NoSectionError):
+                    dim_command = ''
+
+                if 'set 10%-' in dim_command:
+                    config.set(state, 'dim_resume_command', 'brightnessctl set +10%')
+                elif 'set 25%-' in dim_command:
+                    config.set(state, 'dim_resume_command', 'brightnessctl set +25%')
+                elif 'set 5' in dim_command:
+                    config.set(state, 'dim_resume_command', 'brightnessctl set 80%')
+                else:
+                    # Generic fallback
+                    config.set(state, 'dim_resume_command', 'brightnessctl set 100%')
+                updated = True
+
+    if updated:
+        with open(config_file, 'w') as f:
+            config.write(f)
+        print("Added dim_resume_command options to existing config file.")
 
 def setup_config() -> None:
     """Setup configuration directory and copy example config."""
@@ -137,6 +171,8 @@ def setup_config() -> None:
         print(f"Configuration already exists at {config_file}")
         # Ensure lid_switch section exists
         ensure_lid_config(config_file)
+        # Ensure dim_resume_command options exist
+        ensure_dim_resume_config(config_file)
 
 def find_hyprland_config_files() -> list[Path]:
     """Find all Hyprland config files including those sourced."""
@@ -228,7 +264,7 @@ def setup_systemd(systemd_mode: bool, config_file: Path) -> None:
     print("Configuring for systemd mode...")
 
     # Update config.ini
-    config = configparser.ConfigParser()
+    config = configparser.ConfigParser(interpolation=None)  # Disable interpolation
     config.read(config_file)
     if not config.has_section('general'):
         config.add_section('general')

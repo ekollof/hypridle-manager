@@ -158,6 +158,24 @@ def ensure_dim_resume_config(config_file: Path) -> None:
             config.write(f)
         print("Added dim_resume_command options to existing config file.")
 
+def ensure_notification_config(config_file: Path) -> None:
+    """Ensure the config file has notification settings in the general section."""
+    config = configparser.ConfigParser(interpolation=None)
+    config.read(config_file)
+
+    if not config.has_section('general'):
+        config.add_section('general')
+
+    if not config.has_option('general', 'enable_notifications'):
+        config.set('general', 'enable_notifications', 'true')
+
+    if not config.has_option('general', 'notification_timeout'):
+        config.set('general', 'notification_timeout', '5000')
+
+    with open(config_file, 'w') as f:
+        config.write(f)
+    print("Ensured notification configuration in config file.")
+
 def setup_config() -> None:
     """Setup configuration directory and copy example config."""
     config_dir = Path.home() / ".config" / "hypridle-handler"
@@ -173,6 +191,8 @@ def setup_config() -> None:
         ensure_lid_config(config_file)
         # Ensure dim_resume_command options exist
         ensure_dim_resume_config(config_file)
+        # Ensure notification settings exist
+        ensure_notification_config(config_file)
 
 def find_hyprland_config_files() -> list[Path]:
     """Find all Hyprland config files including those sourced."""
@@ -381,4 +401,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

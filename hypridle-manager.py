@@ -18,6 +18,17 @@ if platform.system() != "Linux":
 
 CONFIG_PATH = Path.home() / ".config/hypridle-handler/config.ini"
 
+def send_notification(message: str, timeout: int = 5000) -> None:
+    """
+    @brief Sends a desktop notification.
+    @param message The notification message.
+    @param timeout The notification timeout in milliseconds.
+    """
+    try:
+        subprocess.run(["notify-send", "-t", str(timeout), "Hypridle Manager", message], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to send notification: {e}", file=sys.stderr)
+
 def get_power_status(config: configparser.ConfigParser) -> str:
     """
     @brief Gets the current power status.
@@ -142,19 +153,25 @@ def check_and_enable_hypridle_service() -> None:
     except subprocess.CalledProcessError as e:
         print(f"Error managing hypridle service: {e}", file=sys.stderr)
 
-def handle_power_change(config: configparser.ConfigParser, systemd_mode: bool, hypridle_config_path: Path, current_power_state: list[str | None]) -> None:
+def handle_power_change(config: configparser.ConfigParser, systemd_mode: bool, hypridle_config_path: Path, current_power_state: list[str | None], enable_notifications: bool, notification_timeout: int) -> None:
     """
     @brief Handle power state change and update configuration.
     @param config The configuration parser.
     @param systemd_mode Whether to use systemd mode.
     @param hypridle_config_path The path to the hypridle config file.
     @param current_power_state The mutable list holding the current power state.
+    @param enable_notifications Whether to send notifications.
+    @param notification_timeout The notification timeout in milliseconds.
     """
     new_power_state = get_power_status(config)
 
     if new_power_state != current_power_state[0]:
         print(f"Power state changed to: {new_power_state}")
         current_power_state[0] = new_power_state
+
+        if enable_notifications:
+            message = f"Power state changed to {new_power_state.replace('_', ' ').title()}"
+            send_notification(message, notification_timeout)
 
         hypridle_config_content = generate_hypridle_config(current_power_state[0], config)
 
@@ -164,13 +181,15 @@ def handle_power_change(config: configparser.ConfigParser, systemd_mode: bool, h
         print("hypridle.conf updated. Restarting hypridle...")
         restart_hypridle(systemd_mode)
 
-def monitor_power_events(config: configparser.ConfigParser, systemd_mode: bool, hypridle_config_path: Path, current_power_state: list[str | None]) -> None:
+def monitor_power_events(config: configparser.ConfigParser, systemd_mode: bool, hypridle_config_path: Path, current_power_state: list[str | None], enable_notifications: bool, notification_timeout: int) -> None:
     """
     @brief Monitor power supply events using udev.
     @param config The configuration parser.
     @param systemd_mode Whether to use systemd mode.
     @param hypridle_config_path The path to the hypridle config file.
     @param current_power_state The mutable list holding the current power state.
+    @param enable_notifications Whether to send notifications.
+    @param notification_timeout The notification timeout in milliseconds.
     """
     context = pyudev.Context() # type: ignore
     monitor = pyudev.Monitor.from_netlink(context) # type: ignore
@@ -182,7 +201,7 @@ def monitor_power_events(config: configparser.ConfigParser, systemd_mode: bool, 
         if device.action in ['change', 'add', 'remove']:
             # Small delay to let the system settle after the event
             time.sleep(0.5)
-            handle_power_change(config, systemd_mode, hypridle_config_path, current_power_state)
+            handle_power_change(config, systemd_mode, hypridle_config_path, current_power_state, enable_notifications, notification_timeout)
 
 def main() -> None:
     """
@@ -200,6 +219,8 @@ def main() -> None:
         sys.exit(1)
 
     systemd_mode = config.getboolean('general', 'systemd_mode', fallback=False)
+    enable_notifications = config.getboolean('general', 'enable_notifications', fallback=True)
+    notification_timeout = config.getint('general', 'notification_timeout', fallback=5000)
 
     if systemd_mode:
         check_and_enable_hypridle_service()
@@ -210,12 +231,12 @@ def main() -> None:
     current_power_state: list[str | None] = [None]
 
     # Set initial state
-    handle_power_change(config, systemd_mode, hypridle_config_path, current_power_state)
+    handle_power_change(config, systemd_mode, hypridle_config_path, current_power_state, enable_notifications, notification_timeout)
 
     # Start monitoring in a separate thread so we can handle interrupts
     monitor_thread = threading.Thread(
         target=monitor_power_events,
-        args=(config, systemd_mode, hypridle_config_path, current_power_state),
+        args=(config, systemd_mode, hypridle_config_path, current_power_state, enable_notifications, notification_timeout),
         daemon=True
     )
     monitor_thread.start()

@@ -13,6 +13,12 @@ hypridle_config_path = ~/.config/hypr/hypridle.conf
 # The command to lock the screen.
 lock_command = hyprlock
 
+# Enable notifications on power state change.
+enable_notifications = true
+
+# Notification timeout in milliseconds (0 for no timeout).
+notification_timeout = 5000
+
 [lid_switch]
 # Commands to run when the lid is closed, based on power state.
 # Set to an empty string to do nothing.
